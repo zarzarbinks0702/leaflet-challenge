@@ -21,6 +21,8 @@ function buildMap(data) {
 }).addTo(myMap);
 
   buildMarkers(data);
+  buildLegend(data);
+
 }
 
 function buildMarkers(data) {
@@ -34,7 +36,7 @@ function buildMarkers(data) {
 
     var circleSize = magnitude * 20000;
 
-    var color = ''
+    var color = '';
     if (depth < 10) {
       var color = 'green';
     } else if (depth < 30) {
@@ -59,4 +61,29 @@ function buildMarkers(data) {
 
     earthquakeCircle.addTo(myMap);
   })
+}
+
+function buildLegend(data) {
+  let legendControl = L.control({
+    position: "bottomright",
+  });
+
+  // When the layer control is added, insert a div with the class of "legend"
+  legendControl.onAdd = function () {
+    let div = L.DomUtil.create("div", "legend");
+
+    const htmlInfo = `<p>Earthquake Depth</p>
+    <hr>
+      <p class='green'><10km</p>
+      <p class='lt-green'>10-30km</p>
+      <p class='yellow'>30-50km</p>
+      <p class='yellow-orange'>50-70km</p>
+      <p class='red-orange'>70-90km</p>
+      <p class='red'>+90km</p>`;
+    div.innerHTML = htmlInfo;
+    return div;
+
+  };
+  legendControl.addTo(myMap);
+  return legendControl;
 }

@@ -8,3 +8,37 @@ body,
 html {
   height: 100%;
 }
+
+.green {
+  color: green;
+}
+
+.lt-green {
+  color: #b1db3d;
+}
+
+.yellow {
+  color: yellow;
+}
+
+.yellow-orange {
+  color: #dbbc3d;
+}
+
+.red-orange {
+  color: #db9c3d;
+}
+
+.red {
+  color: red;
+}
+
+.legend {
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 18px;
+  color: white;
+  background-color: #999a8d;
+  border-radius: 10px;
+}
