@@ -59,6 +59,11 @@ function buildMarkers(data) {
       weight: 0.5
     });
 
+    //adding the pop-up when clicked
+    let popuptext = `<h1> ${earthquake.properties.place} </h1> <hr> <h1> Magnitude: ${magnitude} </h1> <h1>Depth: ${depth}km</h1> <hr> <h1>[${earthquakeLat}, ${earthquakeLon}]</h1>`;
+
+    earthquakeCircle.bindPopup(popuptext);
+
     earthquakeCircle.addTo(myMap);
   })
 }
@@ -68,7 +73,6 @@ function buildLegend(data) {
     position: "bottomright",
   });
 
-  // When the layer control is added, insert a div with the class of "legend"
   legendControl.onAdd = function () {
     let div = L.DomUtil.create("div", "legend");
 
