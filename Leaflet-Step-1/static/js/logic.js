@@ -1,11 +1,11 @@
 //data link
 const earthquakeData = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson';
 //enter initial map view on the USA
-const usCenterCoords = [42.877742, -97.380979]
+const usCenterCoords = [42.877742, -97.380979];
 //define the map
 var myMap = L.map("mapid").setView(usCenterCoords, 5);
 //read the data
-d3.json(earthquakeData).then((data) => buildMap(data))
+d3.json(earthquakeData).then((data) => buildMap(data));
 
 /********************************************************************************/
 
