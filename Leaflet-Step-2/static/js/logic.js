@@ -1,10 +1,10 @@
 //data links
 const earthquakeData = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson';
-const boundaryData = '../PB2002_boundaries.json'
+const boundaryData = 'static/PB2002_boundaries.json'
 //enter initial map view on the USA
 const usCenterCoords = [42.877742, -97.380979];
 //define the map
-var myMap = L.map("mapid").setView(usCenterCoords, 5);
+var myMap = L.map("mapid").setView(usCenterCoords, 3);
 //read the data
 d3.json(earthquakeData).then((data) => {
   d3.json(boundaryData).then((boundaries) => buildMap(data, boundaries))
@@ -12,7 +12,7 @@ d3.json(earthquakeData).then((data) => {
 
 /********************************************************************************/
 
-function buildMap(data) {
+function buildMap(data, boundaries) {
 
   const mapLayouts = [L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
@@ -39,6 +39,7 @@ function buildMap(data) {
   mapLayouts.forEach((map) => map.addTo(myMap));
   buildMarkers(data);
   buildLegend(data);
+  buildBoundaries(boundaries);
 
 }
 
@@ -107,4 +108,15 @@ function buildLegend(data) {
   };
   legendControl.addTo(myMap);
   return legendControl;
+}
+
+function buildBoundaries(boundaries) {
+  boundaries.features.forEach((bound) => {
+
+    var coords = bound.geometry.coordinates;
+    var draw_bound = L.polygon(coords, {color: '#af5ec0'});
+
+    draw_bound.addTo(myMap);
+  });
+
 }
