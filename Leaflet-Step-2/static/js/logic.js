@@ -1,6 +1,6 @@
 //data links
 const earthquakeData = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson';
-const boundaryData = 'static/PB2002_boundaries.json'
+const boundaryData = 'static/PB2002_plates.json'
 //enter initial map view on the USA
 const usCenterCoords = [42.877742, -97.380979];
 //define the map
@@ -37,13 +37,26 @@ function buildMap(data, boundaries) {
     })];
 
   mapLayouts.forEach((map) => map.addTo(myMap));
-  buildMarkers(data);
-  buildLegend(data);
-  buildBoundaries(boundaries);
 
+  let baseMaps = {};
+  baseMaps['Street'] = mapLayouts[0];
+  baseMaps['Light'] = mapLayouts[1];
+  baseMaps['Dark'] = mapLayouts[1];
+
+  let earthquakeMarkers = buildMarkers(data);
+  let legend = buildLegend(data);
+  let faultBounds = buildBoundaries(boundaries);
+
+  let geodataOptions = {};
+  geodataOptions['Earthquakes'] = earthquakeMarkers;
+  geodataOptions['Fault Lines'] = faultBounds;
+
+  layerControl(baseMaps, geodataOptions);
 }
 
 function buildMarkers(data) {
+
+  let markers = [];
 
   data.features.forEach((earthquake) => {
 
@@ -83,7 +96,11 @@ function buildMarkers(data) {
     earthquakeCircle.bindPopup(popuptext);
 
     earthquakeCircle.addTo(myMap);
+
+    markers.push(earthquakeCircle);
   })
+
+  return markers;
 }
 
 function buildLegend(data) {
@@ -111,12 +128,34 @@ function buildLegend(data) {
 }
 
 function buildBoundaries(boundaries) {
+
+  let fBounds = [];
+
   boundaries.features.forEach((bound) => {
 
     var coords = bound.geometry.coordinates;
-    var draw_bound = L.polygon(coords, {color: '#af5ec0'});
+    var drawBound = L.polygon(coords, {color: '#af5ec0'});
 
-    draw_bound.addTo(myMap);
+    drawBound.addTo(myMap);
+
+    coords.push(fBounds);
   });
+
+  return fBounds;
+}
+
+function layerControl(myMap, maps, geoData) {
+  let control = L.control.layers(maps, geoData, {
+    collapsed: false,
+    position: "topright",
+  });
+
+  control.addTo(myMap);
+
+  //select all layers when the map is first loaded
+   for (key in geodataOptions) {
+     myMap.addLayer(geodataOptions[key]);
+   }
+  return control;
 
 }
