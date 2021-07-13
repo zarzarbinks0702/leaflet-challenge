@@ -14,44 +14,54 @@ d3.json(earthquakeData).then((data) => {
 
 function buildMap(data, boundaries) {
 
-  const mapLayouts = [L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+  let baseLayers = buildBaseMaps(data);
+
+  let earthquakeMarkers = buildMarkers(data);
+  let legend = buildLegend(data);
+  //let faultBounds = buildBoundaries(boundaries);
+
+  let overlayMaps = {};
+  overlayMaps['Earthquakes'] = earthquakeMarkers;
+  //overlayMaps['Fault Lines'] = faultBounds;
+
+  layerControl(baseLayers, overlayMaps);
+}
+
+function buildBaseMaps(data) {
+  var streetMap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1,
     id: "mapbox/streets-v11",
     accessToken: API_KEY
-  }), L.tileLayer(
+  })
+  var lightMap = L.tileLayer(
   "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 18,
     id: "light-v10",
     accessToken: API_KEY,
-  }), L.tileLayer(
+  })
+  var darkMap = L.tileLayer(
     "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
       attribution:
       'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       maxZoom: 18,
       id: "dark-v10",
       accessToken: API_KEY,
-    })];
+    });
 
-  mapLayouts.forEach((map) => map.addTo(myMap));
+  let baseLayers = {};
+  baseLayers['Street'] = streetMap;
+  baseLayers['Light'] = lightMap;
+  baseLayers['Dark'] = darkMap;
 
-  let baseMaps = {};
-  baseMaps['Street'] = mapLayouts[0];
-  baseMaps['Light'] = mapLayouts[1];
-  baseMaps['Dark'] = mapLayouts[1];
+  streetMap.addTo(myMap);
+  lightMap.addTo(myMap);
+  darkMap.addTo(myMap);
 
-  let earthquakeMarkers = buildMarkers(data);
-  let legend = buildLegend(data);
-  let faultBounds = buildBoundaries(boundaries);
-
-  let geodataOptions = {};
-  geodataOptions['Earthquakes'] = earthquakeMarkers;
-  geodataOptions['Fault Lines'] = faultBounds;
-
-  layerControl(baseMaps, geodataOptions);
+  return baseLayers;
 }
 
 function buildMarkers(data) {
@@ -134,6 +144,7 @@ function buildBoundaries(boundaries) {
   boundaries.features.forEach((bound) => {
 
     var coords = bound.geometry.coordinates;
+
     var drawBound = L.polygon(coords, {color: '#af5ec0'});
 
     drawBound.addTo(myMap);
@@ -144,8 +155,8 @@ function buildBoundaries(boundaries) {
   return fBounds;
 }
 
-function layerControl(myMap, maps, geoData) {
-  let control = L.control.layers(maps, geoData, {
+function layerControl(myMap, baseLayers, overlayMaps) {
+  let control = L.control.layers(baseLayers, overlayMaps, {
     collapsed: false,
     position: "topright",
   });
@@ -153,8 +164,8 @@ function layerControl(myMap, maps, geoData) {
   control.addTo(myMap);
 
   //select all layers when the map is first loaded
-   for (key in geodataOptions) {
-     myMap.addLayer(geodataOptions[key]);
+   for (key in overlayMaps) {
+     myMap.addLayer(overlayMaps[key]);
    }
   return control;
 
